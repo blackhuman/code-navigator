@@ -5,12 +5,14 @@ import { JavascriptASTParser } from './JavascriptASTParser';
 export class JavascriptHierarchyProvider implements CallHierarchyProvider {
 
   prepareCallHierarchy(document: TextDocument, position: Position, token: CancellationToken): ProviderResult<CallHierarchyItem | CallHierarchyItem[]> {
+    console.log('prepareCallHierarchy position', position);
     const range = document.getWordRangeAtPosition(position);
 		if (range) {
 			const word = document.getText(range);
-      console.log('prepareCallHierarchy', word);
+      console.log('prepareCallHierarchy word', word);
 			return this.createCallHierarchyItem(word, '', document, range);
 		} else {
+      console.log('prepareCallHierarchy not in range');
 			return undefined;
 		}
   }
@@ -28,7 +30,7 @@ export class JavascriptHierarchyProvider implements CallHierarchyProvider {
         documentUris.set(result.uri.path, result.uri);
       }
 		});
-    console.log('documentUris', documentUris.values());
+    console.log('documentUris', Array.from(documentUris.keys()));
     
     const incomingCalls: CallHierarchyIncomingCall[] = [];
     const parser = new JavascriptASTParser();

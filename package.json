@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
+    "@types/jscodeshift": "^0.11.2",
     "@types/mocha": "^8.2.2",
     "@types/node": "14.x",
     "@types/underscore": "^1.11.3",
@@ -50,6 +51,7 @@
   "dependencies": {
     "async": "^3.2.1",
     "flexsearch": "^0.7.21",
+    "jscodeshift": "^0.13.0",
     "recast": "^0.20.5",
     "underscore": "^1.13.1"
   }

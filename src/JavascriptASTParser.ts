@@ -1,12 +1,11 @@
-import fs from 'fs';
-import { resolve } from 'path';
-import { parse, visit, types } from 'recast';
-import { start } from 'repl';
-import { reject } from 'underscore';
-import { CallHierarchyIncomingCall, TextDocument, Position, Range, CallHierarchyItem, SymbolKind } from 'vscode';
+import j from "jscodeshift";
+import { types } from 'recast';
+import { CallHierarchyIncomingCall, CallHierarchyItem, Position, Range, SymbolKind, TextDocument } from 'vscode';
 import n = types.namedTypes;
-// import type { NodePath } from 'ast-types';
 type NodePath<T> = InstanceType<typeof types.NodePath>;
+
+// const n = j.types.namedTypes;
+// type NodePath<T> = j.ASTPath;
 
 class CallerMap extends Map<CallHierarchyItem, Range[]> {
 
@@ -29,33 +28,28 @@ class CallerMap extends Map<CallHierarchyItem, Range[]> {
 export class JavascriptASTParser {
 
   async findIncomingCalls(calleeFuncName: string, document: TextDocument): Promise<CallHierarchyIncomingCall[]> {
-    // const callers: CallHierarchyItem[] = [];
     const callerMap = new CallerMap();
-    const ast = parse(document.getText(), {});
-    visit(ast, {
-      visitCallExpression(path) {
-        const { node } = path;
-        const callee = node.callee as n.MemberExpression;
-        if (n.Identifier.check(callee.property)) {
-          const { property } = callee;
-          if (property.name === calleeFuncName) {
-            const calleeFuncRange = convertRange(property.loc!);
-            const callerNode = findCallerFunction(path);
-            const callerName = callerNode.id!.name;
-            const callerRange = convertRange(callerNode.loc!);
+    j(document.getText())
+      .find(j.CallExpression)
+      .forEach(path => {
+        console.log('path', path.node.callee);
+      })
+      .find(j.Identifier, {
+        name: calleeFuncName,
+      })
+      .forEach(path => {
+        console.log('path2', path.node.name);
+      })
+      .forEach(path => {
+        const property = path.node;
+        const calleeFuncRange = convertRange(property.loc!);
+        const callerNode = findCallerFunction(path);
+        const callerName = callerNode.id!.name;
+        const callerRange = convertRange(callerNode.id!.loc!);
 
-            // const position = new vscode.Position(4, 1);
-            // const range = new vscode.Range(position, position.translate({characterDelta: 3}));
-            // const nextItem = this.createCallHierarchyItem('next', '', document, range);
-            // return [new vscode.CallHierarchyIncomingCall(nextItem, [range])];
-            const item = new CallHierarchyItem(SymbolKind.Function, callerName, '', document.uri, callerRange, callerRange);
-            callerMap.addCallee(item, calleeFuncRange);
-            return false;
-          }
-        }
-        this.traverse(path);
-      },
-    });
+        const item = new CallHierarchyItem(SymbolKind.Function, callerName, '', document.uri, callerRange, callerRange);
+        callerMap.addCallee(item, calleeFuncRange);
+      });
     return callerMap.getAsCallHierarchyIncomingCalls();
   }
 }
