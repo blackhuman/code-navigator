@@ -8,7 +8,7 @@ import vscode, { CallHierarchyIncomingCall, CallHierarchyItem, FindTextInFilesOp
 suite('Extension CallHierarchy Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('CallHierarchy test', async () => {
+	test.skip('CallHierarchy test - pure function call', async () => {
     const calleeFuncName = 'selectAllNodes';
     const [uri, position] = await findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
     const prepareCallHierarchyItems = await prepareCallHierarchy(uri, position);
@@ -27,7 +27,26 @@ suite('Extension CallHierarchy Suite', () => {
     assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodes');
 	});
 
-});
+	test('CallHierarchy test - class method call', async () => {
+    const calleeFuncName = 'selectAllNodesMethod';
+    const [uri, position] = await findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
+    const prepareCallHierarchyItems = await prepareCallHierarchy(uri, position);
+    assert.strictEqual(prepareCallHierarchyItems.length, 1);
+    const prepareCallHierarchyItem = prepareCallHierarchyItems[0];
+    assert.strictEqual(prepareCallHierarchyItem.name, calleeFuncName);
+
+    let incomingCallsItems = await provideIncomingCalls(prepareCallHierarchyItem);
+    assert.strictEqual(incomingCallsItems.length, 1);
+    let incomingCallsItem = incomingCallsItems[0];
+    assert.strictEqual(incomingCallsItem.name, 'serviceSelectAllNodesMethod');
+
+    incomingCallsItems = await provideIncomingCalls(incomingCallsItem);
+    assert.strictEqual(incomingCallsItems.length, 1);
+    incomingCallsItem = incomingCallsItems[0];
+    assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodesMethod');
+	}).timeout('10000s');
+
+}).timeout('10000s');
 
 async function prepareCallHierarchy(uri: Uri, position: Position): Promise<CallHierarchyItem[]> {
   return await vscode.commands.executeCommand('vscode.prepareCallHierarchy', uri, position) as CallHierarchyItem[];

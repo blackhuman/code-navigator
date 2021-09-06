@@ -1,11 +1,6 @@
-import j from "jscodeshift";
-import { types } from 'recast';
+import j, { ASTPath } from "jscodeshift";
+import _ from 'underscore';
 import { CallHierarchyIncomingCall, CallHierarchyItem, Position, Range, SymbolKind, TextDocument } from 'vscode';
-import n = types.namedTypes;
-type NodePath<T> = InstanceType<typeof types.NodePath>;
-
-// const n = j.types.namedTypes;
-// type NodePath<T> = j.ASTPath;
 
 class CallerMap extends Map<CallHierarchyItem, Range[]> {
 
@@ -31,43 +26,50 @@ export class JavascriptASTParser {
     const callerMap = new CallerMap();
     j(document.getText())
       .find(j.CallExpression)
-      .forEach(path => {
-        console.log('path', path.node.callee);
-      })
       .find(j.Identifier, {
         name: calleeFuncName,
       })
       .forEach(path => {
-        console.log('path2', path.node.name);
-      })
-      .forEach(path => {
+        console.log('finding in', document.uri.path);
+        const callerTuple = findCallerDefinition(path);
+        if (callerTuple === undefined) {
+          return;
+        }
+        const [callerName, callerRange] = callerTuple;
+        const item = new CallHierarchyItem(SymbolKind.Function, callerName, '', document.uri, callerRange, callerRange);
+
         const property = path.node;
         const calleeFuncRange = convertRange(property.loc!);
-        const callerNode = findCallerFunction(path);
-        const callerName = callerNode.id!.name;
-        const callerRange = convertRange(callerNode.id!.loc!);
-
-        const item = new CallHierarchyItem(SymbolKind.Function, callerName, '', document.uri, callerRange, callerRange);
         callerMap.addCallee(item, calleeFuncRange);
       });
     return callerMap.getAsCallHierarchyIncomingCalls();
   }
 }
 
-function convertPosition(position: n.Position): Position {
+function convertPosition(position: j.Position): Position {
   return new Position(position.line - 1, position.column);
 }
 
-function convertRange(location: n.SourceLocation): Range {
+function convertRange(location: j.SourceLocation): Range {
   const startPosition = convertPosition(location.start);
   const endPosition = convertPosition(location.end);
   return new Range(startPosition, endPosition);
 }
 
-function findCallerFunction(path: NodePath<n.Node>): n.FunctionDeclaration {
-  const parentPath = path.parent as NodePath<n.Node>;
-  if (n.FunctionDeclaration.check(parentPath.node)) {
-    return parentPath.node;
+function findCallerDefinition(path: ASTPath): [string, Range] | undefined {
+  const parent = path.parent;
+  const functionDeclarationNodes = j(parent)
+    .find(j.FunctionDeclaration)
+    .find(j.Identifier)
+    .nodes();
+  const methodDefinitionNodes = j(parent)
+    .find(j.MethodDefinition)
+    .find(j.Identifier)
+    .nodes();
+  const nodes = [...functionDeclarationNodes, ...methodDefinitionNodes];
+  if (_.some(nodes)) {
+    const node = _.head(nodes)!;
+    return [node.name, convertRange(node.loc!)];
   }
-  return findCallerFunction(parentPath);
+  return findCallerDefinition(parent);
 }
