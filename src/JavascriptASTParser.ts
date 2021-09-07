@@ -57,19 +57,11 @@ function convertRange(location: j.SourceLocation): Range {
 }
 
 function findCallerDefinition(path: ASTPath): [string, Range] | undefined {
-  const parent = path.parent;
-  const functionDeclarationNodes = j(parent)
-    .find(j.FunctionDeclaration)
-    .find(j.Identifier)
-    .nodes();
-  const methodDefinitionNodes = j(parent)
-    .find(j.MethodDefinition)
-    .find(j.Identifier)
-    .nodes();
+  const functionDeclarationNodes = j(path).closest(j.FunctionDeclaration).find(j.Identifier).nodes();
+  const methodDefinitionNodes = j(path).closest(j.MethodDefinition).find(j.Identifier).nodes();
   const nodes = [...functionDeclarationNodes, ...methodDefinitionNodes];
   if (_.some(nodes)) {
     const node = _.head(nodes)!;
     return [node.name, convertRange(node.loc!)];
   }
-  return findCallerDefinition(parent);
 }
