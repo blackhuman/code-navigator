@@ -1,7 +1,8 @@
 import storage, { selectAllNodes, selectAllNodesFunc, Storage } from "./storage";
 
 export function serviceSelectAllNodes() {
-  return selectAllNodes();
+  selectAllNodes();
+  selectAllNodes();
 }
 
 export class Service {

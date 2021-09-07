@@ -24,12 +24,12 @@ export class JavascriptASTParser {
 
   async findIncomingCalls(calleeFuncName: string, document: TextDocument): Promise<CallHierarchyIncomingCall[]> {
     const callerMap = new CallerMap();
-    j(document.getText())
+    const paths = j(document.getText())
       .find(j.CallExpression)
       .find(j.Identifier, {
         name: calleeFuncName,
-      })
-      .forEach(path => {
+      }).paths();
+    paths.forEach(path => {
         console.log('finding in', document.uri.path);
         const callerTuple = findCallerDefinition(calleeFuncName, path);
         if (callerTuple === undefined) {
@@ -67,8 +67,8 @@ function findCallerDefinition(calleeFuncName: string, path: ASTPath): [string, R
 
   const iNodes = j(path)
     .closest(j.CallExpression)
-    .filter((p) => 
-      j(p).find(j.Identifier).some((i) => i.node.name === calleeFuncName)
+    .filter(p => 
+      j(p).find(j.Identifier).some(i => i.node.name === calleeFuncName)
     )
     .nodes();
   if (_.some(iNodes)) {

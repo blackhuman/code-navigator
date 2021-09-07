@@ -5,6 +5,19 @@
 {
 	"version": "0.2.0",
 	"configurations": [
+    {
+			"name": "Run Real",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"/Users/baiyizhe/Developer/walle/mtuav-udm",
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"preLaunchTask": "${defaultBuildTask}"
+		},
 		{
 			"name": "Run Extension",
 			"type": "extensionHost",

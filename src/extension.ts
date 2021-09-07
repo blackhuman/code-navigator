@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import _, { groupBy } from 'underscore';
 import { JavascriptHierarchyProvider } from './JavascriptHierarchyProvider';
+import { JavascriptReferenceProvider } from './JavascriptReferenceProvider';
 // import { Index } from 'flexsearch';
 
 // const index = Index();
@@ -17,6 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
       language: 'javascript', 
       scheme: 'file' 
     }, new JavascriptHierarchyProvider())
+  );
+
+  context.subscriptions.push(
+    vscode.languages.registerReferenceProvider({
+      language: 'javascript',
+      scheme: 'file'
+    }, new JavascriptReferenceProvider())
   );
 }
 
