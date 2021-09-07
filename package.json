@@ -10,7 +10,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:code-navigator.helloWorld",
     "onLanguage:javascript"
   ],
   "extensionDependencies": [
@@ -19,10 +18,6 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "code-navigator.helloWorld",
-        "title": "Hello World"
-      }
     ]
   },
   "scripts": {

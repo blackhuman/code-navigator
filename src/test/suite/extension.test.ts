@@ -1,10 +1,5 @@
 import assert from 'assert';
-import { stringify } from 'querystring';
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import vscode, { CallHierarchyIncomingCall, CallHierarchyItem, FindTextInFilesOptions, GlobPattern, Position, Range, TextSearchMatch, TextSearchQuery, Uri } from 'vscode';
-
-// import * as myExtension from '../../extension';
 
 suite('Extension CallHierarchy Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
