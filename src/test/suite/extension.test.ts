@@ -8,7 +8,7 @@ import vscode, { CallHierarchyIncomingCall, CallHierarchyItem, FindTextInFilesOp
 suite('Extension CallHierarchy Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test.skip('CallHierarchy test - pure function call', async () => {
+	test.skip('pure function call', async () => {
     const calleeFuncName = 'selectAllNodes';
     const [uri, position] = await findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
     const prepareCallHierarchyItems = await prepareCallHierarchy(uri, position);
@@ -27,7 +27,7 @@ suite('Extension CallHierarchy Suite', () => {
     assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodes');
 	});
 
-	test('CallHierarchy test - class method call', async () => {
+	test('class method call', async () => {
     const calleeFuncName = 'selectAllNodesMethod';
     const [uri, position] = await findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
     const prepareCallHierarchyItems = await prepareCallHierarchy(uri, position);
@@ -45,6 +45,10 @@ suite('Extension CallHierarchy Suite', () => {
     incomingCallsItem = incomingCallsItems[0];
     assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodesMethod');
 	}).timeout('10000s');
+
+  test('function as parameter', async () => {
+
+  });
 
 }).timeout('10000s');
 

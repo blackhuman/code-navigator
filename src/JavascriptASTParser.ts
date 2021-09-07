@@ -1,4 +1,4 @@
-import j, { ASTPath } from "jscodeshift";
+import j, { ASTPath, ASTNode } from "jscodeshift";
 import _ from 'underscore';
 import { CallHierarchyIncomingCall, CallHierarchyItem, Position, Range, SymbolKind, TextDocument } from 'vscode';
 
@@ -31,7 +31,7 @@ export class JavascriptASTParser {
       })
       .forEach(path => {
         console.log('finding in', document.uri.path);
-        const callerTuple = findCallerDefinition(path);
+        const callerTuple = findCallerDefinition(calleeFuncName, path);
         if (callerTuple === undefined) {
           return;
         }
@@ -56,12 +56,35 @@ function convertRange(location: j.SourceLocation): Range {
   return new Range(startPosition, endPosition);
 }
 
-function findCallerDefinition(path: ASTPath): [string, Range] | undefined {
+function findCallerDefinition(calleeFuncName: string, path: ASTPath): [string, Range] | undefined {
   const functionDeclarationNodes = j(path).closest(j.FunctionDeclaration).find(j.Identifier).nodes();
   const methodDefinitionNodes = j(path).closest(j.MethodDefinition).find(j.Identifier).nodes();
   const nodes = [...functionDeclarationNodes, ...methodDefinitionNodes];
   if (_.some(nodes)) {
     const node = _.head(nodes)!;
     return [node.name, convertRange(node.loc!)];
+  }
+
+  const iNodes = j(path).closest(j.CallExpression, {
+    arguments: [
+      {
+        type: j.Identifier.toString(),
+        name: calleeFuncName
+      }
+    ]
+  }).nodes();
+  if (_.some(iNodes)) {
+    const node = _.head(iNodes)!;
+    return [getCallerName(node), convertRange(node.loc!)];
+  }
+}
+
+function getCallerName(callerNode: j.CallExpression): string {
+  const node = callerNode.callee;
+  if (j.MemberExpression.check(node)) {
+    const jNode = (node as j.MemberExpression);
+    return (jNode.object as j.Identifier).name + '.' + (jNode.property as j.Identifier).name;
+  } else {
+    return (node as j.Identifier).name;
   }
 }

@@ -11,3 +11,9 @@ export class Service {
     this.storage.selectAllNodesMethod();
   }
 }
+
+function invokeFunc(func) {
+  func();
+}
+
+invokeFunc(selectAllNodes);
