@@ -65,6 +65,9 @@ function findCallerDefinition(calleeFuncName: string, path: ASTPath): [string, R
     return [node.name, convertRange(node.loc!)];
   }
 
+  // const iNodes = j(path).closest(j.CallExpression)
+  //   .filter((p) => j(p).find(j.Identifier).forEach((i) => console.log(i)).some((i) => i.name === calleeFuncName))
+  //   .nodes();
   const iNodes = j(path).closest(j.CallExpression, {
     arguments: [
       {

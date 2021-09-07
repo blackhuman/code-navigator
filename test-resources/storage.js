@@ -7,3 +7,7 @@ export class Storage {
 
   }
 }
+
+export function selectAllNodesFunc() {
+
+}

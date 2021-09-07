@@ -1,4 +1,4 @@
-import { selectAllNodes, Storage } from "./storage";
+import { selectAllNodes, selectAllNodesFunc, Storage } from "./storage";
 
 export function serviceSelectAllNodes() {
   return selectAllNodes();
@@ -16,4 +16,4 @@ function invokeFunc(func) {
   func();
 }
 
-invokeFunc(selectAllNodes);
+invokeFunc(selectAllNodesFunc);
