@@ -50,9 +50,7 @@ suite('Extension CallHierarchy Suite', () => {
     const prepareCallHierarchyItem = await testPrepareCallHierarchyItem('selectAllNodesFunc', 'storage.js');
     
     let incomingCallsItems = await provideIncomingCalls(prepareCallHierarchyItem);
-    assert.strictEqual(incomingCallsItems.length, 1);
-    let incomingCallsItem = incomingCallsItems[0];
-    assert.strictEqual(incomingCallsItem.name, 'invokeFunc');
+    assert.strictEqual(incomingCallsItems.length, 3);
   });
 
 }).timeout('10000s');

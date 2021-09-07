@@ -65,17 +65,12 @@ function findCallerDefinition(calleeFuncName: string, path: ASTPath): [string, R
     return [node.name, convertRange(node.loc!)];
   }
 
-  // const iNodes = j(path).closest(j.CallExpression)
-  //   .filter((p) => j(p).find(j.Identifier).forEach((i) => console.log(i)).some((i) => i.name === calleeFuncName))
-  //   .nodes();
-  const iNodes = j(path).closest(j.CallExpression, {
-    arguments: [
-      {
-        type: j.Identifier.toString(),
-        name: calleeFuncName
-      }
-    ]
-  }).nodes();
+  const iNodes = j(path)
+    .closest(j.CallExpression)
+    .filter((p) => 
+      j(p).find(j.Identifier).some((i) => i.node.name === calleeFuncName)
+    )
+    .nodes();
   if (_.some(iNodes)) {
     const node = _.head(iNodes)!;
     return [getCallerName(node), convertRange(node.loc!)];

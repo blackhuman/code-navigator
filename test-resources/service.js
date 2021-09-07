@@ -1,4 +1,4 @@
-import { selectAllNodes, selectAllNodesFunc, Storage } from "./storage";
+import storage, { selectAllNodes, selectAllNodesFunc, Storage } from "./storage";
 
 export function serviceSelectAllNodes() {
   return selectAllNodes();
@@ -17,3 +17,13 @@ function invokeFunc(func) {
 }
 
 invokeFunc(selectAllNodesFunc);
+
+class InvokeFuncClazz {
+  invokeFuncMethod(func) {
+    func();
+  }
+}
+
+const clazz = new InvokeFuncClazz();
+clazz.invokeFuncMethod(selectAllNodesFunc);
+clazz.invokeFuncMethod(storage.selectAllNodesFunc);
