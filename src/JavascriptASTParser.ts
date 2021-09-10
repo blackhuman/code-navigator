@@ -1,6 +1,7 @@
 import j, { ASTPath, ASTNode } from "jscodeshift";
 import _ from 'underscore';
 import { CallHierarchyIncomingCall, CallHierarchyItem, Position, Range, SymbolKind, TextDocument } from 'vscode';
+import { FileUtil } from './util';
 
 class CallerMap extends Map<CallHierarchyItem, Range[]> {
 
@@ -29,14 +30,15 @@ export class JavascriptASTParser {
       .find(j.Identifier, {
         name: calleeFuncName,
       }).paths();
+    console.log('finding in', document.uri.path);
     paths.forEach(path => {
-        console.log('finding in', document.uri.path);
         const callerTuple = findCallerDefinition(calleeFuncName, path);
         if (callerTuple === undefined) {
           return;
         }
         const [callerName, callerRange] = callerTuple;
-        const item = new CallHierarchyItem(SymbolKind.Function, callerName, '', document.uri, callerRange, callerRange);
+        const detail = FileUtil.getRelativePath(document.uri.path);
+        const item = new CallHierarchyItem(SymbolKind.Function, callerName, detail, document.uri, callerRange, callerRange);
 
         const property = path.node;
         const calleeFuncRange = convertRange(property.loc!);

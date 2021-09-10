@@ -20,6 +20,15 @@ export namespace FileUtil {
     return Array.from(uris.values());
   }
 
+  export async function findTextInFilesReturnUrisInMultiplePlaces(query: TextSearchQuery, optionsArray: FindTextInFilesOptions[]): Promise<Uri[]> {
+    const uris: Uri[] = [];
+    for (const options of optionsArray) {
+      const result = await findTextInFilesReturnUris(query, options);
+      uris.push(...result);
+    }
+    return uris;
+  }
+
   export async function findTextFisrtStartPositionInFile(queryPattern: string, filePattern: GlobPattern): Promise<[Uri, Position]> {
     const searchMatchs = await findTextInFiles({ pattern: queryPattern }, { include: filePattern });
     if (searchMatchs.length === 0) {
@@ -29,5 +38,10 @@ export namespace FileUtil {
     const ranges = searchMatch.ranges as Range[];
     const range = ranges[0];
     return [searchMatch.uri, range.start];
+  }
+
+  export function getRelativePath(absolutePath: string): string {
+    const basePath = vscode.workspace.workspaceFolders![0].uri!.path;
+    return absolutePath.replace(basePath, '');
   }
 }

@@ -13,11 +13,12 @@ export class JavascriptReferenceProvider implements ReferenceProvider {
 		}
     const calleeFuncName = document.getText(range);
 
-    const documentUris = await FileUtil.findTextInFilesReturnUris({
+    const documentUris = await FileUtil.findTextInFilesReturnUrisInMultiplePlaces({
       pattern: calleeFuncName
-    }, {
-      exclude: "{**/mtuav-udm-proto,**/test,**/bin,**/.history}"
-    });
+    }, [
+      { include: "lib/**/*.js" },
+      { include: "src/**/*.js" }
+    ]);
     
     const locations: Location[] = [];
     for (const uri of documentUris) {
@@ -28,6 +29,7 @@ export class JavascriptReferenceProvider implements ReferenceProvider {
       const locs = calls.flatMap(incomingCall => incomingCall.fromRanges.map(range => new Location(incomingCall.from.uri, range)));
       locations.push(...locs);
     }
+    console.log('reference number', locations.length);
     return locations;
   }
 }

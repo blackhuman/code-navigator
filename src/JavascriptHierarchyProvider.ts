@@ -18,17 +18,18 @@ export class JavascriptHierarchyProvider implements CallHierarchyProvider {
 
   async provideCallHierarchyIncomingCalls(item: CallHierarchyItem, token: CancellationToken): Promise<CallHierarchyIncomingCall[] | undefined> {
     const calleeFuncName = item.name;
-    const documentUris = await FileUtil.findTextInFilesReturnUris({
+    const documentUris = await FileUtil.findTextInFilesReturnUrisInMultiplePlaces({
       pattern: calleeFuncName
-    }, {
-      exclude: "{**/mtuav-udm-proto,**/test,**/bin,**/.history}"
-    });
+    }, [
+      { include: "lib/**/*.js" },
+      { include: "src/**/*.js" }
+    ]);
     
     const incomingCalls: CallHierarchyIncomingCall[] = [];
     for (const uri of documentUris) {
       const document = await vscode.workspace.openTextDocument(uri);
       const calls = await this.parser.findIncomingCalls(calleeFuncName, document);
-      console.log('documentUris', uri);
+      console.log('documentUris', uri.path);
       console.log('calls size', calls.length);
       incomingCalls.push(...calls);
     }
