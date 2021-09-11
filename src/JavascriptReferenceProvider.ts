@@ -1,6 +1,6 @@
 import vscode, { CancellationToken, Location, Position, ProviderResult, ReferenceContext, ReferenceProvider, TextDocument } from 'vscode';
 import { JavascriptASTParser } from './JavascriptASTParser';
-import { FileUtil } from './util';
+import { VSCodeUtil } from './util/vscode-util';
 
 export class JavascriptReferenceProvider implements ReferenceProvider {
   
@@ -13,12 +13,7 @@ export class JavascriptReferenceProvider implements ReferenceProvider {
 		}
     const calleeFuncName = document.getText(range);
 
-    const documentUris = await FileUtil.findTextInFilesReturnUrisInMultiplePlaces({
-      pattern: calleeFuncName
-    }, [
-      { include: "lib/**/*.js" },
-      { include: "src/**/*.js" }
-    ]);
+    const documentUris = await VSCodeUtil.findTextInFilesReturnUrisInMultiplePlaces(calleeFuncName);
     
     const locations: Location[] = [];
     for (const uri of documentUris) {

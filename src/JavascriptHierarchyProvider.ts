@@ -1,6 +1,6 @@
 import vscode, { CallHierarchyIncomingCall, CallHierarchyItem, CallHierarchyOutgoingCall, CallHierarchyProvider, CancellationToken, Position, ProviderResult, Range, SymbolKind, TextDocument, Uri } from 'vscode';
 import { JavascriptASTParser } from './JavascriptASTParser';
-import { FileUtil } from './util';
+import { VSCodeUtil } from './util/vscode-util';
 
 export class JavascriptHierarchyProvider implements CallHierarchyProvider {
 
@@ -18,17 +18,13 @@ export class JavascriptHierarchyProvider implements CallHierarchyProvider {
 
   async provideCallHierarchyIncomingCalls(item: CallHierarchyItem, token: CancellationToken): Promise<CallHierarchyIncomingCall[] | undefined> {
     const calleeFuncName = item.name;
-    const documentUris = await FileUtil.findTextInFilesReturnUrisInMultiplePlaces({
-      pattern: calleeFuncName
-    }, [
-      { include: "lib/**/*.js" },
-      { include: "src/**/*.js" }
-    ]);
+    const calleeModuleName = VSCodeUtil.getCurrentModuleName(item.uri.path);
+    const documentUris = await VSCodeUtil.findTextInFilesReturnUrisInMultiplePlaces(calleeFuncName);
     
     const incomingCalls: CallHierarchyIncomingCall[] = [];
     for (const uri of documentUris) {
       const document = await vscode.workspace.openTextDocument(uri);
-      const calls = await this.parser.findIncomingCalls(calleeFuncName, document);
+      const calls = await this.parser.findIncomingCalls(calleeFuncName, document, calleeModuleName);
       console.log('documentUris', uri.path);
       console.log('calls size', calls.length);
       incomingCalls.push(...calls);

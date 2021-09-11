@@ -1,12 +1,12 @@
 import assert from 'assert';
 import vscode, { CallHierarchyIncomingCall, CallHierarchyItem, FindTextInFilesOptions, GlobPattern, Position, Range, TextSearchMatch, TextSearchQuery, Uri } from 'vscode';
-import { FileUtil } from '../../util';
+import { VSCodeUtil } from '../../util/vscode-util';
 
 suite('Extension CallHierarchy Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
   async function testPrepareCallHierarchyItem(calleeFuncName: string, filename: string): Promise<CallHierarchyItem> {
-    const [uri, position] = await FileUtil.findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
+    const [uri, position] = await VSCodeUtil.findTextFisrtStartPositionInFile(calleeFuncName, 'storage.js');
     const prepareCallHierarchyItems = await prepareCallHierarchy(uri, position);
     assert.strictEqual(prepareCallHierarchyItems.length, 1);
     const prepareCallHierarchyItem = prepareCallHierarchyItems[0];
@@ -14,7 +14,7 @@ suite('Extension CallHierarchy Suite', () => {
     return prepareCallHierarchyItem;
   }
 
-	test.skip('pure function call', async () => {
+	test.only('pure function call', async () => {
     const prepareCallHierarchyItem = await testPrepareCallHierarchyItem('selectAllNodes', 'storage.js');
 
     let incomingCallsItems = await provideIncomingCalls(prepareCallHierarchyItem);
@@ -28,7 +28,7 @@ suite('Extension CallHierarchy Suite', () => {
     assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodes');
 	});
 
-	test('class method call', async () => {
+	test.skip('class method call', async () => {
     const prepareCallHierarchyItem = await testPrepareCallHierarchyItem('selectAllNodesMethod', 'storage.js');
 
     let incomingCallsItems = await provideIncomingCalls(prepareCallHierarchyItem);
@@ -40,16 +40,16 @@ suite('Extension CallHierarchy Suite', () => {
     assert.strictEqual(incomingCallsItems.length, 1);
     incomingCallsItem = incomingCallsItems[0];
     assert.strictEqual(incomingCallsItem.name, 'handlerSelectAllNodesMethod');
-	}).timeout('10000s');
+	});
 
-  test('function as parameter', async () => {
+  test.skip('function as parameter', async () => {
     const prepareCallHierarchyItem = await testPrepareCallHierarchyItem('selectAllNodesFunc', 'storage.js');
     
     let incomingCallsItems = await provideIncomingCalls(prepareCallHierarchyItem);
     assert.strictEqual(incomingCallsItems.length, 3);
   });
 
-}).timeout('10000s');
+});
 
 async function prepareCallHierarchy(uri: Uri, position: Position): Promise<CallHierarchyItem[]> {
   return await vscode.commands.executeCommand('vscode.prepareCallHierarchy', uri, position) as CallHierarchyItem[];
