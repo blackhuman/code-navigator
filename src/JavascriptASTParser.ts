@@ -1,5 +1,4 @@
 import j, { ASTPath, ASTNode, Collection } from "jscodeshift";
-import findImports from "../libs/jscodeshift-find-imports";
 import _ from 'underscore';
 import { CallHierarchyIncomingCall, CallHierarchyItem, Position, Range, SymbolKind, TextDocument, Uri } from 'vscode';
 import { VSCodeUtil } from './util/vscode-util';
@@ -25,11 +24,13 @@ class CallerMap extends Map<CallHierarchyItem, Range[]> {
 export class JavascriptASTParser {
 
   async findIncomingCalls(calleeFuncName: string, document: TextDocument, calleeModuleName?: string): Promise<CallHierarchyIncomingCall[]> {
+    console.log('getImportModules uri', document.uri.path);
+    const callerModuleName = VSCodeUtil.getCurrentModuleName(document.uri.path);
     const importModules = getImportModules(j(document.getText()), document.uri);
     console.log('calleeModuleName', calleeModuleName);
     console.log('importModules', importModules);
     const callerMap = new CallerMap();
-    if (calleeModuleName !== undefined && !importModules.has(calleeModuleName)) {
+    if (callerModuleName !== calleeModuleName && calleeModuleName !== undefined && !importModules.has(calleeModuleName)) {
       return callerMap.getAsCallHierarchyIncomingCalls();
     }
     const paths = j(document.getText())
@@ -95,14 +96,17 @@ function findCallerDefinition(calleeFuncName: string, path: ASTPath, calleeModul
 }
 
 function getImportModules(jCollection: Collection, uri: Uri): Set<string> {
-  console.log('getImportModules', uri.path);
   const requireModuleNames = jCollection
     .find(j.VariableDeclaration)
-    .find(j.CallExpression)
-    .forEach(v => console.log('requireModuleNames1', v))
-    .find(j.Identifier)
+    .find(j.CallExpression, {
+      callee: {
+        type: j.Identifier.toString(),
+        name: 'require'
+      }
+    })
+    .find(j.Literal)
     .nodes()
-    .map(node => node.name);
+    .map(node => node.value) as string[];
   const importModuleNames = jCollection
     .find(j.ImportDeclaration)
     .find(j.Literal)

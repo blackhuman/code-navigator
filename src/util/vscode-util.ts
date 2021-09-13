@@ -25,13 +25,14 @@ export namespace VSCodeUtil {
   }
 
   export async function findTextInFilesReturnUrisInMultiplePlaces(queryPattern: string, includes: string[] = []): Promise<Uri[]> {
-    const query: TextSearchQuery = { pattern: queryPattern };
+    const query: TextSearchQuery = { pattern: queryPattern, isCaseSensitive: true, isWordMatch: true };
     const confIncludes = vscode.workspace.getConfiguration('codenav').get('includes') as string[];
-    let optionsArray: vscode.FindTextInFilesOptions[] = [{}];
-    if (includes.length !== 0) {
-      includes.push(...confIncludes);
-      optionsArray = includes!.map(v => ({ include: v}));
-    }
+    console.log('confIncludes', confIncludes);
+    includes.push(...confIncludes);
+    let optionsArray: vscode.FindTextInFilesOptions[] = 
+      _.isEmpty(includes) ?
+      [{}] :
+      includes!.map(v => ({ include: v}));
     const uris: Uri[] = [];
     for (const options of optionsArray) {
       const result = await findTextInFilesReturnUris(query, options);

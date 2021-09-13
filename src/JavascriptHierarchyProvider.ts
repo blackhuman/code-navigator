@@ -21,6 +21,7 @@ export class JavascriptHierarchyProvider implements CallHierarchyProvider {
     const calleeModuleName = VSCodeUtil.getCurrentModuleName(item.uri.path);
     const documentUris = await VSCodeUtil.findTextInFilesReturnUrisInMultiplePlaces(calleeFuncName);
     
+    console.log('provideCallHierarchyIncomingCalls documentUris', documentUris.map(v => v.path));
     const incomingCalls: CallHierarchyIncomingCall[] = [];
     for (const uri of documentUris) {
       const document = await vscode.workspace.openTextDocument(uri);
