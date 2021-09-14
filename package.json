@@ -3,6 +3,9 @@
   "displayName": "Code Navigator",
   "description": "Code Navigator",
   "version": "0.0.1",
+  "icon": "icon.png",
+  "repository": "https://github.com/blackhuman/code-navigator",
+  "publisher": "relba",
   "engines": {
     "vscode": "^1.59.0"
   },
@@ -36,12 +39,15 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "compile": "npm run esbuild-base -- --sourcemap",
+    "watch": "npm run esbuild-base -- --sourcemap --watch",
+    "package": "vsce package",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "test-compile": "tsc -p ./"
   },
   "devDependencies": {
     "@types/chai": "^4.2.21",
@@ -56,11 +62,13 @@
     "@types/vscode": "^1.59.0",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
+    "esbuild": "^0.12.27",
     "eslint": "^7.27.0",
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
     "mocha-explorer-launcher-scripts": "^0.3.0",
     "typescript": "^4.3.2",
+    "vsce": "^1.99.0",
     "vscode-test": "^1.5.2"
   },
   "dependencies": {
